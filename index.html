@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPIO Data Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+</head>
+<body>
+    <h1>GPIO Pin State</h1>
+    <canvas id="waveform" width="800" height="400"></canvas>
+    <script>
+        const ctx = document.getElementById('waveform').getContext('2d');
+
+        // Register streaming plugin
+        Chart.register(ChartStreaming);
+
+        // Create the chart
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'GPIO Pin State',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    data: []  // Empty dataset initially
+                }]
+            },
+            options: {
+                plugins: {
+                    streaming: {
+                        duration: 20000, // 20 seconds of data
+                        refresh: 1000,   // Refresh every 1 second
+                        delay: 1000      // Delay 1 second
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'realtime', // Realtime scale
+                        realtime: {
+                            duration: 20000,
+                            refresh: 1000,
+                            delay: 1000
+                        }
+                    },
+                    y: {
+                        min: -0.5,
+                        max: 1.5
+                    }
+                }
+            }
+        });
+
+        // WebSocket connection
+        const ws = new WebSocket('ws://localhost:8080');
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            chart.data.datasets[0].data.push({
+                x: Date.now(),  // Use current timestamp
+                y: data.state   // GPIO pin state
+            });
+        };
+    </script>
+</body>
+</html>
+
