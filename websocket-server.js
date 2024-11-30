@@ -9,23 +9,27 @@ let pinState = 0; // Simulated GPIO pin state (0 or 1)
 // Simulate GPIO pin updates (you can replace this with real GPIO data)
 setInterval(() => {
     pinState = pinState === 0 ? 1 : 0; // Toggle pin state for testing
-}, 500); // Update every 500ms
+    console.log("Toggling pin state... " + pinState);
+
+    // Send data to all connected clients immediately after state change
+    const data = {
+        timestamp: Date.now(),
+        value: pinState,
+    };
+    console.log(data.timestamp + " " + data.value);
+
+    wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(data));
+        }
+    });
+}, 250); // Update every 250ms
 
 // Handle WebSocket connections
 wss.on('connection', (ws) => {
     console.log('New client connected');
 
-    // Send data to client periodically
-    const intervalId = setInterval(() => {
-        const data = {
-            timestamp: Date.now(),  // Use current server timestamp
-            value: pinState,
-        };
-
-        // Send data as JSON
-        ws.send(JSON.stringify(data));
-    }, 1000);
-
+    // No need for an additional interval here since we're sending data on state change
 
     // Log incoming messages from the client
     ws.on('message', (message) => {
@@ -35,7 +39,6 @@ wss.on('connection', (ws) => {
     // Clean up when the client disconnects
     ws.on('close', () => {
         console.log('Client disconnected');
-        clearInterval(intervalId);
     });
 });
 
