@@ -67,7 +67,7 @@
         const ws = new WebSocket('ws://localhost:8080');
 
         ws.onmessage = (event) => {
-            console.log('Received data:', event.data);
+            // console.log('Received data:', event.data);
             const data = JSON.parse(event.data);
             chart.data.datasets[0].data.push({
                 x: Date.now(),   // Use current timestamp
