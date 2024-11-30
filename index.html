@@ -13,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2.0.0"></script>
 </head>
 <body>
-    <h1>GPIO Pin State</h1>
+    <h1>GPIO Pin States</h1>
     <canvas id="waveform" width="800" height="400"></canvas>
     <script>
         const ctx = document.getElementById('waveform').getContext('2d');
@@ -21,20 +21,37 @@
         // Register the streaming plugin
         Chart.register(ChartStreaming);
 
+        // Define colors for datasets
+        const colors = [
+            'rgba(255, 99, 132, 1)',   // Red
+            'rgba(54, 162, 235, 1)',   // Blue
+            'rgba(255, 206, 86, 1)',   // Yellow
+            'rgba(75, 192, 192, 1)',   // Green
+            'rgba(153, 102, 255, 1)',  // Purple
+            'rgba(255, 159, 64, 1)'    // Orange
+        ];
+
+        // Create datasets for each input
+        const datasets = [];
+        for (let i = 0; i < 6; i++) {
+            datasets.push({
+                label: 'GPIO Pin ' + (i + 1),
+                borderColor: colors[i],
+                borderWidth: 1.2,
+                data: [],
+                parsing: false,  // Important for streaming
+                stepped: true,   // Stepped line for square transitions
+                fill: false,     // No fill under the line
+                pointRadius: 0,  // Hide data point markers
+                yAxisID: 'y',    // Use the same y-axis for all datasets
+            });
+        }
+
         // Create the chart
         const chart = new Chart(ctx, {
             type: 'line',
             data: {
-                datasets: [{
-                    label: 'GPIO Pin State',
-                    borderColor: 'rgba(75, 90, 192, 1)',
-                    borderWidth: 1.2,
-                    data: [],
-                    parsing: false,  // Important for streaming
-                    stepped: true,   // Stepped line for square transitions
-                    fill: false,     // No fill under the line
-                    pointRadius: 0   // Hide data point markers
-                }]
+                datasets: datasets
             },
             options: {
                 scales: {
@@ -42,8 +59,8 @@
                         type: 'realtime', // Realtime scale
                         realtime: {
                             duration: 20000,
-                            refresh: 500,
-                            delay: 500
+                            refresh: 250,   // Refresh every 250ms
+                            delay: 250      // Delay of 250ms
                         },
                         time: {
                             parser: 'unix'
@@ -51,13 +68,18 @@
                     },
                     y: {
                         min: -0.5,
-                        max: 1.5,
+                        max: 6.5,
                         ticks: {
                             stepSize: 1,
                             callback: function(value) {
-                                return value;
+                                return value % 1 === 0 ? value : null; // Show integer ticks
                             }
                         }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true
                     }
                 }
             }
@@ -67,13 +89,18 @@
         const ws = new WebSocket('ws://localhost:8080');
 
         ws.onmessage = (event) => {
-            // console.log('Received data:', event.data);
             const data = JSON.parse(event.data);
-            chart.data.datasets[0].data.push({
-                x: Date.now(),   // Use current timestamp
-                y: data.value    // Use the correct property from your data
-            });
+            const timestamp = data.timestamp;
+
+            // For each dataset, push the corresponding value
+            for (let i = 0; i < data.values.length; i++) {
+                chart.data.datasets[i].data.push({
+                    x: timestamp,   // Use the timestamp from the server
+                    y: data.values[i] + i // Offset the y-value by i to stack the lines
+                });
+            }
         };
     </script>
 </body>
 </html>
+
