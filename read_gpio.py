@@ -5,6 +5,7 @@ import socket
 
 # Pin configuration
 DATA_PIN = 17  # Replace with your GPIO pin
+
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(DATA_PIN, GPIO.IN)
 
