@@ -2,11 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPIO Data Visualization</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+    <!-- Include date-fns library -->
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/dist/date-fns.min.js"></script>
+    <!-- Include the date-fns adapter -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0"></script>
+    <!-- Include the streaming plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2.0.0"></script>
 </head>
 <body>
     <h1>GPIO Pin State</h1>
@@ -15,7 +19,7 @@
         const ctx = document.getElementById('waveform').getContext('2d');
 
         // Register streaming plugin
-        Chart.register(ChartStreaming);
+        Chart.register(StreamingPlugin);
 
         // Create the chart
         const chart = new Chart(ctx, {
@@ -24,18 +28,12 @@
                 datasets: [{
                     label: 'GPIO Pin State',
                     borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1,
-                    data: []  // Empty dataset initially
+                    borderWidth: 2,
+                    data: [],
+                    parsing: false  // Important for streaming
                 }]
             },
             options: {
-                plugins: {
-                    streaming: {
-                        duration: 20000, // 20 seconds of data
-                        refresh: 500,   // Refresh every 1 second
-                        delay: 500      // Delay 1 second
-                    }
-                },
                 scales: {
                     x: {
                         type: 'realtime', // Realtime scale
@@ -57,13 +55,13 @@
         const ws = new WebSocket('ws://localhost:8080');
 
         ws.onmessage = (event) => {
+            console.log('Received data:', event.data);
             const data = JSON.parse(event.data);
             chart.data.datasets[0].data.push({
-                x: Date.now(),  // Use current timestamp
-                y: data.state   // GPIO pin state
+                x: Date.now(),   // Use current timestamp
+                y: data.value    // Corrected from data.state
             });
         };
     </script>
 </body>
 </html>
-
