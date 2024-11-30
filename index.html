@@ -18,8 +18,8 @@
     <script>
         const ctx = document.getElementById('waveform').getContext('2d');
 
-        // Register streaming plugin
-        Chart.register(StreamingPlugin);
+        // Register streaming plugin using the correct variable
+        Chart.register(ChartStreaming);
 
         // Create the chart
         const chart = new Chart(ctx, {
