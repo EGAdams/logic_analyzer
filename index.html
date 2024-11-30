@@ -5,10 +5,10 @@
     <title>GPIO Data Visualization</title>
     <!-- Include Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
-    <!-- Include date-fns library -->
-    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/dist/date-fns.min.js"></script>
-    <!-- Include the date-fns adapter -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0"></script>
+    <!-- Include Luxon -->
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.2/build/global/luxon.min.js"></script>
+    <!-- Include the Luxon adapter -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.2.0"></script>
     <!-- Include the streaming plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2.0.0"></script>
 </head>
@@ -18,7 +18,7 @@
     <script>
         const ctx = document.getElementById('waveform').getContext('2d');
 
-        // Register streaming plugin using the correct variable
+        // Register the streaming plugin
         Chart.register(ChartStreaming);
 
         // Create the chart
@@ -41,6 +41,9 @@
                             duration: 20000,
                             refresh: 500,
                             delay: 500
+                        },
+                        time: {
+                            parser: 'unix' // Ensure timestamps are parsed correctly
                         }
                     },
                     y: {
@@ -59,7 +62,7 @@
             const data = JSON.parse(event.data);
             chart.data.datasets[0].data.push({
                 x: Date.now(),   // Use current timestamp
-                y: data.value    // Corrected from data.state
+                y: data.value    // Use the correct property from your data
             });
         };
     </script>

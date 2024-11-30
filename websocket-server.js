@@ -18,13 +18,14 @@ wss.on('connection', (ws) => {
     // Send data to client periodically
     const intervalId = setInterval(() => {
         const data = {
-            timestamp: Date.now(),
-            value: pinState, // Replace this with the actual GPIO pin state
+            timestamp: Date.now(),  // Use current server timestamp
+            value: pinState,
         };
 
         // Send data as JSON
         ws.send(JSON.stringify(data));
-    }, 1000); // Adjust frequency as needed
+    }, 1000);
+
 
     // Log incoming messages from the client
     ws.on('message', (message) => {
