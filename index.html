@@ -30,7 +30,10 @@
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 2,
                     data: [],
-                    parsing: false  // Important for streaming
+                    parsing: false,  // Important for streaming
+                    stepped: true,   // Stepped line for square transitions
+                    fill: false,     // No fill under the line
+                    pointRadius: 0   // Hide data point markers
                 }]
             },
             options: {
@@ -43,12 +46,18 @@
                             delay: 500
                         },
                         time: {
-                            parser: 'unix' // Ensure timestamps are parsed correctly
+                            parser: 'unix'
                         }
                     },
                     y: {
                         min: -0.5,
-                        max: 1.5
+                        max: 1.5,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value) {
+                                return value;
+                            }
+                        }
                     }
                 }
             }
