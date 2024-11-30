@@ -3,21 +3,29 @@ const WebSocket = require('ws');
 // Set up WebSocket server
 const wss = new WebSocket.Server({ port: 8080 });
 
-// Mock GPIO data source (replace this with actual GPIO reading logic)
-let pinState = 0; // Simulated GPIO pin state (0 or 1)
+// Initialize an array to simulate 6 GPIO pin states
+let pinStates = [0, 0, 0, 0, 0, 0]; // Simulated GPIO pin states for 6 inputs
 
-// Simulate GPIO pin updates (you can replace this with real GPIO data)
+// Simulate GPIO pin updates
 setInterval(() => {
-    pinState = pinState === 0 ? 1 : 0; // Toggle pin state for testing
-    console.log("Toggling pin state... " + pinState);
+    // Randomly change each pin state
+    for (let i = 0; i < pinStates.length; i++) {
+        // 50% chance to toggle the pin state
+        if (Math.random() < 0.5) {
+            pinStates[i] = pinStates[i] === 0 ? 1 : 0;
+        }
+    }
 
-    // Send data to all connected clients immediately after state change
+    console.log("Updated pin states: " + pinStates);
+
+    // Prepare data to send to clients
     const data = {
         timestamp: Date.now(),
-        value: pinState,
+        values: pinStates, // Send array of pin states
     };
-    console.log(data.timestamp + " " + data.value);
+    console.log(data.timestamp + " " + data.values);
 
+    // Send data to all connected clients
     wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify(data));
@@ -28,8 +36,6 @@ setInterval(() => {
 // Handle WebSocket connections
 wss.on('connection', (ws) => {
     console.log('New client connected');
-
-    // No need for an additional interval here since we're sending data on state change
 
     // Log incoming messages from the client
     ws.on('message', (message) => {
