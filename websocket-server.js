@@ -7,9 +7,10 @@ wss.on('connection', (ws) => {
 
     // Example: Sending a message to the client every second
     setInterval(() => {
-        const mockData = Math.random() > 0.5 ? 1 : 0; // Example square wave
+        const mockData = Math.random() > 0.25 ? 1 : 0; // Example square wave
+        console.log(`Sending mock data: ${mockData}`);
         ws.send(JSON.stringify({ timestamp: Date.now(), value: mockData }));
-    }, 1000);
+    }, 250);
 
     ws.on('message', (message) => {
         console.log(`Received message from client: ${message}`);
